@@ -2,14 +2,14 @@ var BookInstance = require("../models/bookinstance");
 var Book = require("../models/book");
 var async = require("async");
 
-const { body, validationResult } = require("express-validator/check");
-const { sanitizeBody } = require("express-validator/filter");
+const { body, validationResult } = require("express-validator");
+
 
 // Display list of all BookInstances.
-exports.bookinstance_list = function(req, res, next) {
+exports.bookinstance_list = function (req, res, next) {
   BookInstance.find()
     .populate("book")
-    .exec(function(err, list_bookinstances) {
+    .exec(function (err, list_bookinstances) {
       if (err) {
         return next(err);
       }
@@ -22,10 +22,10 @@ exports.bookinstance_list = function(req, res, next) {
 };
 
 // Display detail page for a specific BookInstance.
-exports.bookinstance_detail = function(req, res, next) {
+exports.bookinstance_detail = function (req, res, next) {
   BookInstance.findById(req.params.id)
     .populate("book")
-    .exec(function(err, bookinstance) {
+    .exec(function (err, bookinstance) {
       if (err) {
         return next(err);
       }
@@ -44,8 +44,8 @@ exports.bookinstance_detail = function(req, res, next) {
 };
 
 // Display BookInstance create form on GET.
-exports.bookinstance_create_get = function(req, res, next) {
-  Book.find({}, "title").exec(function(err, books) {
+exports.bookinstance_create_get = function (req, res, next) {
+  Book.find({}, "title").exec(function (err, books) {
     if (err) {
       return next(err);
     }
@@ -71,10 +71,10 @@ exports.bookinstance_create_post = [
     .isISO8601(),
 
   // Sanitize fields.
-  sanitizeBody("book").escape(),
+  /*sanitizeBody("book").escape(),
   sanitizeBody("imprint").escape(),
   sanitizeBody("status").escape(),
-  sanitizeBody("due_back").toDate(),
+  sanitizeBody("due_back").toDate(),*/
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -91,7 +91,7 @@ exports.bookinstance_create_post = [
 
     if (!errors.isEmpty()) {
       // There are errors. Render form again with sanitized values and error messages.
-      Book.find({}, "title").exec(function(err, books) {
+      Book.find({}, "title").exec(function (err, books) {
         if (err) {
           return next(err);
         }
@@ -107,7 +107,7 @@ exports.bookinstance_create_post = [
       return;
     } else {
       // Data from form is valid
-      bookinstance.save(function(err) {
+      bookinstance.save(function (err) {
         if (err) {
           return next(err);
         }
@@ -119,10 +119,10 @@ exports.bookinstance_create_post = [
 ];
 
 // Display BookInstance delete form on GET.
-exports.bookinstance_delete_get = function(req, res, next) {
+exports.bookinstance_delete_get = function (req, res, next) {
   BookInstance.findById(req.params.id)
     .populate("book")
-    .exec(function(err, bookinstance) {
+    .exec(function (err, bookinstance) {
       if (err) {
         return next(err);
       }
@@ -139,7 +139,7 @@ exports.bookinstance_delete_get = function(req, res, next) {
 };
 
 // Handle BookInstance delete on POST.
-exports.bookinstance_delete_post = function(req, res, next) {
+exports.bookinstance_delete_post = function (req, res, next) {
   // Assume valid BookInstance id in field.
   BookInstance.findByIdAndRemove(req.body.id, function deleteBookInstance(err) {
     if (err) {
@@ -151,20 +151,20 @@ exports.bookinstance_delete_post = function(req, res, next) {
 };
 
 // Display BookInstance update form on GET.
-exports.bookinstance_update_get = function(req, res, next) {
+exports.bookinstance_update_get = function (req, res, next) {
   // Get book, authors and genres for form.
   async.parallel(
     {
-      bookinstance: function(callback) {
+      bookinstance: function (callback) {
         BookInstance.findById(req.params.id)
           .populate("book")
           .exec(callback);
       },
-      books: function(callback) {
+      books: function (callback) {
         Book.find(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -199,10 +199,10 @@ exports.bookinstance_update_post = [
     .isISO8601(),
 
   // Sanitize fields.
-  sanitizeBody("book").escape(),
+  /*sanitizeBody("book").escape(),
   sanitizeBody("imprint").escape(),
   sanitizeBody("status").escape(),
-  sanitizeBody("due_back").toDate(),
+  sanitizeBody("due_back").toDate(),*/
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -220,7 +220,7 @@ exports.bookinstance_update_post = [
 
     if (!errors.isEmpty()) {
       // There are errors so render the form again, passing sanitized values and errors.
-      Book.find({}, "title").exec(function(err, books) {
+      Book.find({}, "title").exec(function (err, books) {
         if (err) {
           return next(err);
         }
@@ -236,7 +236,7 @@ exports.bookinstance_update_post = [
       return;
     } else {
       // Data from form is valid.
-      BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {}, function(
+      BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {}, function (
         err,
         thebookinstance
       ) {

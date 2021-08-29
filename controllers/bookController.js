@@ -1,5 +1,5 @@
-const { body, validationResult } = require("express-validator/check");
-const { sanitizeBody } = require("express-validator/filter");
+const { body, validationResult } = require("express-validator");
+
 var Book = require("../models/book");
 var Author = require("../models/author");
 var Genre = require("../models/genre");
@@ -7,26 +7,26 @@ var BookInstance = require("../models/bookinstance");
 
 var async = require("async");
 
-exports.index = function(req, res) {
+exports.index = function (req, res) {
   async.parallel(
     {
-      book_count: function(callback) {
+      book_count: function (callback) {
         Book.countDocuments({}, callback); // Pass an empty object as match condition to find all documents of this collection
       },
-      book_instance_count: function(callback) {
+      book_instance_count: function (callback) {
         BookInstance.countDocuments({}, callback);
       },
-      book_instance_available_count: function(callback) {
+      book_instance_available_count: function (callback) {
         BookInstance.countDocuments({ status: "Available" }, callback);
       },
-      author_count: function(callback) {
+      author_count: function (callback) {
         Author.countDocuments({}, callback);
       },
-      genre_count: function(callback) {
+      genre_count: function (callback) {
         Genre.countDocuments({}, callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       res.render("index", {
         title: "Local Library Home",
         error: err,
@@ -38,10 +38,10 @@ exports.index = function(req, res) {
 
 // Display list of all books.
 // Display list of all Books.
-exports.book_list = function(req, res, next) {
+exports.book_list = function (req, res, next) {
   Book.find({}, "title author")
     .populate("author")
-    .exec(function(err, list_books) {
+    .exec(function (err, list_books) {
       if (err) {
         return next(err);
       }
@@ -52,20 +52,20 @@ exports.book_list = function(req, res, next) {
 
 // Display detail page for a specific book.
 // Display detail page for a specific book.
-exports.book_detail = function(req, res, next) {
+exports.book_detail = function (req, res, next) {
   async.parallel(
     {
-      book: function(callback) {
+      book: function (callback) {
         Book.findById(req.params.id)
           .populate("author")
           .populate("genre")
           .exec(callback);
       },
-      book_instance: function(callback) {
+      book_instance: function (callback) {
         BookInstance.find({ book: req.params.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -86,18 +86,18 @@ exports.book_detail = function(req, res, next) {
 };
 
 // Display book create form on GET.
-exports.book_create_get = function(req, res, next) {
+exports.book_create_get = function (req, res, next) {
   // Get all authors and genres, which we can use for adding to our book.
   async.parallel(
     {
-      authors: function(callback) {
+      authors: function (callback) {
         Author.find(callback);
       },
-      genres: function(callback) {
+      genres: function (callback) {
         Genre.find(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -137,7 +137,7 @@ exports.book_create_post = [
     .isLength({ min: 1 }),
 
   // Sanitize fields (using wildcard).
-  sanitizeBody("*").escape(),
+  //sanitizeBody("*").escape(),
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -159,14 +159,14 @@ exports.book_create_post = [
       // Get all authors and genres for form.
       async.parallel(
         {
-          authors: function(callback) {
+          authors: function (callback) {
             Author.find(callback);
           },
-          genres: function(callback) {
+          genres: function (callback) {
             Genre.find(callback);
           }
         },
-        function(err, results) {
+        function (err, results) {
           if (err) {
             return next(err);
           }
@@ -189,7 +189,7 @@ exports.book_create_post = [
       return;
     } else {
       // Data from form is valid. Save book.
-      book.save(function(err) {
+      book.save(function (err) {
         if (err) {
           return next(err);
         }
@@ -200,20 +200,20 @@ exports.book_create_post = [
   }
 ];
 // Display book delete form on GET.
-exports.book_delete_get = function(req, res, next) {
+exports.book_delete_get = function (req, res, next) {
   async.parallel(
     {
-      book: function(callback) {
+      book: function (callback) {
         Book.findById(req.params.id)
           .populate("author")
           .populate("genre")
           .exec(callback);
       },
-      book_bookinstances: function(callback) {
+      book_bookinstances: function (callback) {
         BookInstance.find({ book: req.params.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -232,22 +232,22 @@ exports.book_delete_get = function(req, res, next) {
 };
 
 // Handle book delete on POST.
-exports.book_delete_post = function(req, res, next) {
+exports.book_delete_post = function (req, res, next) {
   // Assume the post has valid id (ie no validation/sanitization).
 
   async.parallel(
     {
-      book: function(callback) {
+      book: function (callback) {
         Book.findById(req.body.id)
           .populate("author")
           .populate("genre")
           .exec(callback);
       },
-      book_bookinstances: function(callback) {
+      book_bookinstances: function (callback) {
         BookInstance.find({ book: req.body.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -276,24 +276,24 @@ exports.book_delete_post = function(req, res, next) {
 
 // Display book update form on GET.
 // Display book update form on GET.
-exports.book_update_get = function(req, res, next) {
+exports.book_update_get = function (req, res, next) {
   // Get book, authors and genres for form.
   async.parallel(
     {
-      book: function(callback) {
+      book: function (callback) {
         Book.findById(req.params.id)
           .populate("author")
           .populate("genre")
           .exec(callback);
       },
-      authors: function(callback) {
+      authors: function (callback) {
         Author.find(callback);
       },
-      genres: function(callback) {
+      genres: function (callback) {
         Genre.find(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -359,11 +359,11 @@ exports.book_update_post = [
     .isLength({ min: 1 }),
 
   // Sanitize fields.
-  sanitizeBody("title").escape(),
+  /*sanitizeBody("title").escape(),
   sanitizeBody("author").escape(),
   sanitizeBody("summary").escape(),
   sanitizeBody("isbn").escape(),
-  sanitizeBody("genre.*").escape(),
+  sanitizeBody("genre.*").escape(),*/
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -386,14 +386,14 @@ exports.book_update_post = [
       // Get all authors and genres for form.
       async.parallel(
         {
-          authors: function(callback) {
+          authors: function (callback) {
             Author.find(callback);
           },
-          genres: function(callback) {
+          genres: function (callback) {
             Genre.find(callback);
           }
         },
-        function(err, results) {
+        function (err, results) {
           if (err) {
             return next(err);
           }
@@ -416,7 +416,7 @@ exports.book_update_post = [
       return;
     } else {
       // Data from form is valid. Update the record.
-      Book.findByIdAndUpdate(req.params.id, book, {}, function(err, thebook) {
+      Book.findByIdAndUpdate(req.params.id, book, {}, function (err, thebook) {
         if (err) {
           return next(err);
         }

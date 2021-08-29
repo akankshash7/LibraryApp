@@ -1,15 +1,15 @@
-const { body, validationResult } = require("express-validator/check");
-const { sanitizeBody } = require("express-validator/filter");
+const { body, validationResult } = require("express-validator");
+
 var async = require("async");
 var Book = require("../models/book");
 var Author = require("../models/author");
 
 // Display list of all Authors.
-exports.author_list = function(req, res, next) {
+exports.author_list = function (req, res, next) {
   Author.find()
     .populate("author")
     .sort([["family_name", "ascending"]])
-    .exec(function(err, list_authors) {
+    .exec(function (err, list_authors) {
       if (err) {
         return next(err);
       }
@@ -23,17 +23,17 @@ exports.author_list = function(req, res, next) {
 
 // Display detail page for a specific Author.
 // Display detail page for a specific Author.
-exports.author_detail = function(req, res, next) {
+exports.author_detail = function (req, res, next) {
   async.parallel(
     {
-      author: function(callback) {
+      author: function (callback) {
         Author.findById(req.params.id).exec(callback);
       },
-      authors_books: function(callback) {
+      authors_books: function (callback) {
         Book.find({ author: req.params.id }, "title summary").exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       } // Error in API usage.
@@ -54,7 +54,7 @@ exports.author_detail = function(req, res, next) {
 };
 
 // Display Author create form on GET.
-exports.author_create_get = function(req, res, next) {
+exports.author_create_get = function (req, res, next) {
   res.render("author_form", { title: "Create Author" });
 };
 
@@ -82,10 +82,10 @@ exports.author_create_post = [
     .isISO8601(),
 
   // Sanitize fields.
-  sanitizeBody("first_name").escape(),
+  /*sanitizeBody("first_name").escape(),
   sanitizeBody("family_name").escape(),
   sanitizeBody("date_of_birth").toDate(),
-  sanitizeBody("date_of_death").toDate(),
+  sanitizeBody("date_of_death").toDate(),*/
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -110,7 +110,7 @@ exports.author_create_post = [
         date_of_birth: req.body.date_of_birth,
         date_of_death: req.body.date_of_death
       });
-      author.save(function(err) {
+      author.save(function (err) {
         if (err) {
           return next(err);
         }
@@ -121,17 +121,17 @@ exports.author_create_post = [
   }
 ];
 // Display Author delete form on GET.
-exports.author_delete_get = function(req, res, next) {
+exports.author_delete_get = function (req, res, next) {
   async.parallel(
     {
-      author: function(callback) {
+      author: function (callback) {
         Author.findById(req.params.id).exec(callback);
       },
-      authors_books: function(callback) {
+      authors_books: function (callback) {
         Book.find({ author: req.params.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -151,17 +151,17 @@ exports.author_delete_get = function(req, res, next) {
 
 // Handle Author delete on POST.
 // Handle Author delete on POST.
-exports.author_delete_post = function(req, res, next) {
+exports.author_delete_post = function (req, res, next) {
   async.parallel(
     {
-      author: function(callback) {
+      author: function (callback) {
         Author.findById(req.body.authorid).exec(callback);
       },
-      authors_books: function(callback) {
+      authors_books: function (callback) {
         Book.find({ author: req.body.authorid }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -189,8 +189,8 @@ exports.author_delete_post = function(req, res, next) {
 };
 
 // Display Author update form on GET.
-exports.author_update_get = function(req, res, next) {
-  Author.findById(req.params.id, function(err, author) {
+exports.author_update_get = function (req, res, next) {
+  Author.findById(req.params.id, function (err, author) {
     if (err) {
       return next(err);
     }
@@ -228,10 +228,10 @@ exports.author_update_post = [
     .isISO8601(),
 
   // Sanitize fields.
-  sanitizeBody("first_name").escape(),
+  /*sanitizeBody("first_name").escape(),
   sanitizeBody("family_name").escape(),
   sanitizeBody("date_of_birth").toDate(),
-  sanitizeBody("date_of_death").toDate(),
+  sanitizeBody("date_of_death").toDate(),*/
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -257,7 +257,7 @@ exports.author_update_post = [
       return;
     } else {
       // Data from form is valid. Update the record.
-      Author.findByIdAndUpdate(req.params.id, author, {}, function(
+      Author.findByIdAndUpdate(req.params.id, author, {}, function (
         err,
         theauthor
       ) {

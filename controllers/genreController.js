@@ -2,14 +2,13 @@ var Genre = require("../models/genre");
 var Book = require("../models/book");
 var async = require("async");
 
-const { body, validationResult } = require("express-validator/check");
-const { sanitizeBody } = require("express-validator/filter");
+const { body, validationResult } = require("express-validator");
 
 // Display list of all Genre.
-exports.genre_list = function(req, res, next) {
+exports.genre_list = function (req, res, next) {
   Genre.find()
     .sort([["name", "ascending"]])
-    .exec(function(err, list_genres) {
+    .exec(function (err, list_genres) {
       if (err) {
         return next(err);
       }
@@ -22,18 +21,18 @@ exports.genre_list = function(req, res, next) {
 };
 
 // Display detail page for a specific Genre.
-exports.genre_detail = function(req, res, next) {
+exports.genre_detail = function (req, res, next) {
   async.parallel(
     {
-      genre: function(callback) {
+      genre: function (callback) {
         Genre.findById(req.params.id).exec(callback);
       },
 
-      genre_books: function(callback) {
+      genre_books: function (callback) {
         Book.find({ genre: req.params.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -54,7 +53,7 @@ exports.genre_detail = function(req, res, next) {
 };
 
 // Display Genre create form on GET.
-exports.genre_create_get = function(req, res, next) {
+exports.genre_create_get = function (req, res, next) {
   res.render("genre_form", { title: "Create Genre" });
 };
 
@@ -66,7 +65,7 @@ exports.genre_create_post = [
     .trim(),
 
   // Sanitize (trim) the name field.
-  sanitizeBody("name").escape(),
+  //sanitizeBody("name").escape(),
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -87,7 +86,7 @@ exports.genre_create_post = [
     } else {
       // Data from form is valid.
       // Check if Genre with same name already exists.
-      Genre.findOne({ name: req.body.name }).exec(function(err, found_genre) {
+      Genre.findOne({ name: req.body.name }).exec(function (err, found_genre) {
         if (err) {
           return next(err);
         }
@@ -96,7 +95,7 @@ exports.genre_create_post = [
           // Genre exists, redirect to its detail page.
           res.redirect(found_genre.url);
         } else {
-          genre.save(function(err) {
+          genre.save(function (err) {
             if (err) {
               return next(err);
             }
@@ -110,17 +109,17 @@ exports.genre_create_post = [
 ];
 
 // Display Genre delete form on GET.
-exports.genre_delete_get = function(req, res, next) {
+exports.genre_delete_get = function (req, res, next) {
   async.parallel(
     {
-      genre: function(callback) {
+      genre: function (callback) {
         Genre.findById(req.params.id).exec(callback);
       },
-      genre_books: function(callback) {
+      genre_books: function (callback) {
         Book.find({ genre: req.params.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -139,17 +138,17 @@ exports.genre_delete_get = function(req, res, next) {
 };
 
 // Handle Genre delete on POST.
-exports.genre_delete_post = function(req, res, next) {
+exports.genre_delete_post = function (req, res, next) {
   async.parallel(
     {
-      genre: function(callback) {
+      genre: function (callback) {
         Genre.findById(req.params.id).exec(callback);
       },
-      genre_books: function(callback) {
+      genre_books: function (callback) {
         Book.find({ genre: req.params.id }).exec(callback);
       }
     },
-    function(err, results) {
+    function (err, results) {
       if (err) {
         return next(err);
       }
@@ -177,8 +176,8 @@ exports.genre_delete_post = function(req, res, next) {
 };
 
 // Display Genre update form on GET.
-exports.genre_update_get = function(req, res, next) {
-  Genre.findById(req.params.id, function(err, genre) {
+exports.genre_update_get = function (req, res, next) {
+  Genre.findById(req.params.id, function (err, genre) {
     if (err) {
       return next(err);
     }
@@ -201,7 +200,7 @@ exports.genre_update_post = [
     .trim(),
 
   // Sanitize (escape) the name field.
-  sanitizeBody("name").escape(),
+  //sanitizeBody("name").escape(),
 
   // Process request after validation and sanitization.
   (req, res, next) => {
@@ -224,7 +223,7 @@ exports.genre_update_post = [
       return;
     } else {
       // Data from form is valid. Update the record.
-      Genre.findByIdAndUpdate(req.params.id, genre, {}, function(
+      Genre.findByIdAndUpdate(req.params.id, genre, {}, function (
         err,
         thegenre
       ) {
